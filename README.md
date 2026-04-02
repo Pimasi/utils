@@ -1,7 +1,7 @@
-# @bahatron/utils
+# @pimasi/utils
 
 ```bash
-npm install @bahatron/utils
+npm install @pimasi/utils
 ```
 
 The only utility library you'll ever need - a comprehensive collection of TypeScript utilities for common programming tasks.
@@ -40,7 +40,7 @@ The only utility library you'll ever need - a comprehensive collection of TypeSc
 // ─── Imports ─────────────────────────────────────────────────────────────────
 
 // v4
-import { JsonSchema, Types, Logger } from "@bahatron/utils";
+import { JsonSchema, Types, Logger } from "@pimasi/utils";
 JsonSchema.StringEnum(["a", "b"] as const);
 JsonSchema.Nullable(JsonSchema.String());
 type T = Types.Resolved<Promise<string>>;
@@ -48,7 +48,7 @@ const logger = Logger.Create({ id: "app" });
 Logger.Formatters.Pretty(entry);
 
 // v5
-import { JsonSchema, Logger } from "@bahatron/utils";
+import { JsonSchema, Logger } from "@pimasi/utils";
 const { Schema } = JsonSchema;
 Schema.String({ enum: ["a", "b"] as const }); // "a" | "b"
 Schema.Nullable(Schema.String()); // string | null
@@ -59,7 +59,7 @@ Logger.Formatters.Pretty(entry);
 // ─── Schema builders ────────────────────────────────────────────────────────
 
 // v4 (TypeBox)
-import { JsonSchema } from "@bahatron/utils";
+import { JsonSchema } from "@pimasi/utils";
 JsonSchema.String();
 JsonSchema.StringEnum(["a", "b"] as const);
 JsonSchema.Nullable(JsonSchema.String());
@@ -100,7 +100,7 @@ Fast and simple event-driven logger with customizable formatting and log level c
 ### Usage
 
 ```ts
-import { Logger } from "@bahatron/utils";
+import { Logger } from "@pimasi/utils";
 
 const logger = Logger.Logger({
     id: "myLogger",
@@ -130,7 +130,7 @@ logger.off("ERROR", handler);
 ### Formatters
 
 ```ts
-import { Logger } from "@bahatron/utils";
+import { Logger } from "@pimasi/utils";
 
 Logger.Formatters.Pretty(entry); // Human-readable coloured output
 Logger.Formatters.Yml(context); // YAML-like indented format
@@ -158,7 +158,7 @@ Collection of highly useful helper functions for common tasks.
 Execute tasks in parallel with controlled concurrency using a worker pool.
 
 ```ts
-import { Helpers } from "@bahatron/utils";
+import { Helpers } from "@pimasi/utils";
 
 const urls = ["url1", "url2", "url3", ...];
 
@@ -177,7 +177,7 @@ await Helpers.parallelize({
 Retry a function with exponential backoff on failure.
 
 ```ts
-import { Helpers } from "@bahatron/utils";
+import { Helpers } from "@pimasi/utils";
 
 const result = await Helpers.retry(
     async () => {
@@ -196,7 +196,7 @@ const result = await Helpers.retry(
 Safely retrieve environment variables with optional default values.
 
 ```ts
-import { Helpers } from "@bahatron/utils";
+import { Helpers } from "@pimasi/utils";
 
 // With default value
 const apiKey = Helpers.getenv("API_KEY", "default-key");
@@ -210,7 +210,7 @@ const dbUrl = Helpers.getenv("DATABASE_URL");
 Pause execution for a specified duration.
 
 ```ts
-import { Helpers } from "@bahatron/utils";
+import { Helpers } from "@pimasi/utils";
 
 await Helpers.sleep(2000); // Sleep for 2 seconds
 ```
@@ -220,7 +220,7 @@ await Helpers.sleep(2000); // Sleep for 2 seconds
 Safe JSON stringification with circular reference handling using fast-safe-stringify.
 
 ```ts
-import { Helpers } from "@bahatron/utils";
+import { Helpers } from "@pimasi/utils";
 
 const circularObj = { a: 1 };
 circularObj.self = circularObj;
@@ -234,7 +234,7 @@ const json = Helpers.jsonStringify(circularObj);
 Safe JSON parsing that returns `undefined` instead of throwing errors.
 
 ```ts
-import { Helpers } from "@bahatron/utils";
+import { Helpers } from "@pimasi/utils";
 
 const obj = Helpers.jsonParse('{"valid": "json"}');
 // Returns: { valid: "json" }
@@ -248,7 +248,7 @@ const invalid = Helpers.jsonParse("invalid json");
 Wrapper for command-line scripts with proper error handling and process exit codes.
 
 ```ts
-import { Helpers } from "@bahatron/utils";
+import { Helpers } from "@pimasi/utils";
 
 Helpers.execute(async () => {
     // Your script logic
@@ -276,7 +276,7 @@ Type-safe JSON Schema builder with full TypeScript inference — no external sch
 ### Import
 
 ```ts
-import { JsonSchema } from "@bahatron/utils";
+import { JsonSchema } from "@pimasi/utils";
 const { Schema } = JsonSchema;
 
 // Type helpers
@@ -546,7 +546,7 @@ Runtime-agnostic, type-safe implementation of event emitter pattern.
 ### Usage
 
 ```ts
-import { Observable } from "@bahatron/utils";
+import { Observable } from "@pimasi/utils";
 
 // Define events with types
 type Events = "userCreated" | "userDeleted" | "userUpdated";
@@ -602,7 +602,7 @@ All exceptions include:
 - `context` - Additional error context
 
 ```ts
-import { Error } from "@bahatron/utils";
+import { Error } from "@pimasi/utils";
 
 // 4xx Client Errors
 throw Error.BadRequest({ field: "email" }, "Invalid email format");
@@ -631,7 +631,7 @@ throw Error.NotImplemented();
 ### Usage Example
 
 ```ts
-import { Error } from "@bahatron/utils";
+import { Error } from "@pimasi/utils";
 
 function getUser(id: number) {
     const user = db.users.find(id);
@@ -673,7 +673,7 @@ Axios-compatible HTTP client built on native `fetch`. Drop-in replacement with t
 ### Usage
 
 ```ts
-import { Http } from "@bahatron/utils";
+import { Http } from "@pimasi/utils";
 
 // Use the default instance directly
 const response = await Http.http({
@@ -707,7 +707,7 @@ const created = await client({
 ### Interceptors
 
 ```ts
-import { Http } from "@bahatron/utils";
+import { Http } from "@pimasi/utils";
 
 const client = Http.create({ baseURL: "https://api.example.com" });
 
@@ -744,7 +744,7 @@ client.interceptors.request.clear();
 ### Error Handling
 
 ```ts
-import { Http } from "@bahatron/utils";
+import { Http } from "@pimasi/utils";
 
 const client = Http.create({ baseURL: "https://api.example.com" });
 
@@ -817,4 +817,4 @@ Apache-2.0
 
 ## Contributing
 
-Issues and pull requests are welcome at [github.com/bahatron/utils](https://github.com/bahatron/utils)
+Issues and pull requests are welcome at [github.com/pimasi/utils](https://github.com/pimasi/utils)
