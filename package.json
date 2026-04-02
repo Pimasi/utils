@@ -29,6 +29,11 @@
             "default": "./lib/observable/index.js"
         }
     },
+    "files": [
+        "lib/",
+        "README.md",
+        "LICENSE"
+    ],
     "scripts": {
         "test": "vitest run",
         "watch": "npm run build -- --watch",
