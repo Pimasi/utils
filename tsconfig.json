@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "target": "esnext",
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "declaration": true,
+        "diagnostics": true,
+        "incremental": true,
+        "sourceMap": true,
+        "outDir": "lib",
+        "strict": true,
+    },
+    "exclude": [
+        "node_modules",
+        "lib"
+    ]
+}

@@ -1,0 +1,12 @@
+.git/
+node_modules/
+src/
+tests/
+examples/
+tsconfig*.json
+playground/
+.mocharc.js
+jest.config.js
+.prettierrc
+lib/tsconfig.tsbuildinfo
+*.mocha.*
