@@ -1,6 +1,7 @@
 {
     "name": "@pimasi/utils",
     "version": "1.0.1",
+    "private": false,
     "description": "The only utility library you'll ever need",
     "exports": {
         "./lib/error": {
@@ -35,6 +36,9 @@
         "build:prod": "rm -rf lib && npm run build && vitest run --config vitest.config.lib.mts",
         "preversion": "npm run build:prod",
         "prepare": "husky"
+    },
+    "publishConfig": {
+        "access": "public"
     },
     "repository": {
         "type": "git",
