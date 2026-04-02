@@ -8,78 +8,12 @@ The only utility library you'll ever need - a comprehensive collection of TypeSc
 
 ## Table of Contents
 
-- [v5 Breaking Changes & Migration Guide](#v5-breaking-changes--migration-guide)
 - [Logger](#logger)
 - [Helpers](#helpers)
 - [JsonSchema](#jsonschema)
 - [Observable](#observable)
 - [Error](#error)
 - [Http](#http)
-
----
-
-## v5 Breaking Changes & Migration Guide
-
-### Breaking Changes
-
-1. **`typebox` dependency removed** — all schema types (`TSchema`, `Static`, etc.) are now built-in. The `typebox` package is no longer a dependency.
-
-2. **`Types` export removed** — `Types.Resolved<T>`, `Types.Falsy`, and `Types.Truthy` are no longer exported. Use TypeScript's built-in `Awaited<T>` instead of `Resolved<T>`.
-
-3. **`JsonSchema` restructured** — the top-level export is still `JsonSchema`, but it now contains a `Schema` object with all builders and `validate`. Type helpers (`Static`, `InferRawSchema`) are exported at the `JsonSchema` level.
-
-4. **`Logger.Create` renamed to `Logger.Logger`** — the default export was removed in favour of a named export.
-
-5. **`Logger.Formatters` restructured** — `Formatters.Pretty` (was `PrettyFormatter`) and `Formatters.Yml` (was `YmlFormatter`) are now named exports under a `Formatters` namespace.
-
-6. **Schema builder API replaced** — TypeBox-based helpers (`StringEnum`, `Nullable`, `Email`, `DateExtended`) are replaced by a new built-in schema system with `Schema.Nullable()`, `Schema.Optional()` wrappers and `enum` options on primitive builders. `Composite` replaces manual `allOf` composition.
-
-### Migration Guide
-
-```ts
-// ─── Imports ─────────────────────────────────────────────────────────────────
-
-// v4
-import { JsonSchema, Types, Logger } from "@pimasi/utils";
-JsonSchema.StringEnum(["a", "b"] as const);
-JsonSchema.Nullable(JsonSchema.String());
-type T = Types.Resolved<Promise<string>>;
-const logger = Logger.Create({ id: "app" });
-Logger.Formatters.Pretty(entry);
-
-// v5
-import { JsonSchema, Logger } from "@pimasi/utils";
-const { Schema } = JsonSchema;
-Schema.String({ enum: ["a", "b"] as const }); // "a" | "b"
-Schema.Nullable(Schema.String()); // string | null
-type T = Awaited<Promise<string>>; // built-in TS utility
-const logger = Logger.Logger({ id: "app" });
-Logger.Formatters.Pretty(entry);
-
-// ─── Schema builders ────────────────────────────────────────────────────────
-
-// v4 (TypeBox)
-import { JsonSchema } from "@pimasi/utils";
-JsonSchema.String();
-JsonSchema.StringEnum(["a", "b"] as const);
-JsonSchema.Nullable(JsonSchema.String());
-JsonSchema.Email();
-
-// v5
-const { Schema } = JsonSchema;
-Schema.String();
-Schema.String({ enum: ["a", "b"] as const });
-Schema.Nullable(Schema.String());
-Schema.String({ format: "email" });
-
-// ─── Validation ─────────────────────────────────────────────────────────────
-
-// v4
-JsonSchema.validate(data, schema);
-
-// v5
-Schema.validate(data, schema);
-```
 
 ---
 
@@ -100,9 +34,9 @@ Fast and simple event-driven logger with customizable formatting and log level c
 ### Usage
 
 ```ts
-import { Logger } from "@pimasi/utils";
+import { Logger } from "@pimasi/utils/lib/logger";
 
-const logger = Logger.Logger({
+const logger = Logger({
     id: "myLogger",
     pretty: false,
     minLogLevel: "INFO",
@@ -130,15 +64,15 @@ logger.off("ERROR", handler);
 ### Formatters
 
 ```ts
-import { Logger } from "@pimasi/utils";
+import { Formatters } from "@pimasi/utils/lib/logger";
 
-Logger.Formatters.Pretty(entry); // Human-readable coloured output
-Logger.Formatters.Yml(context); // YAML-like indented format
+Formatters.Pretty(entry); // Human-readable coloured output
+Formatters.Yml(context); // YAML-like indented format
 ```
 
 ### API
 
-- `Logger.Logger(options?)` - Create a new logger instance
+- `Logger(options?)` - Create a new logger instance
 - `logger.debug(context, message?)` - Log debug information
 - `logger.info(context, message?)` - Log informational messages
 - `logger.warn(context, message?)` - Log warnings
@@ -158,11 +92,11 @@ Collection of highly useful helper functions for common tasks.
 Execute tasks in parallel with controlled concurrency using a worker pool.
 
 ```ts
-import { Helpers } from "@pimasi/utils";
+import { parallelize } from "@pimasi/utils/lib/helpers";
 
 const urls = ["url1", "url2", "url3", ...];
 
-await Helpers.parallelize({
+await parallelize({
     workers: 10,
     queue: urls,
     handler: async (url) => {
@@ -177,9 +111,9 @@ await Helpers.parallelize({
 Retry a function with exponential backoff on failure.
 
 ```ts
-import { Helpers } from "@pimasi/utils";
+import { retry } from "@pimasi/utils/lib/helpers";
 
-const result = await Helpers.retry(
+const result = await retry(
     async () => {
         return await unstableApiCall();
     },
@@ -196,13 +130,13 @@ const result = await Helpers.retry(
 Safely retrieve environment variables with optional default values.
 
 ```ts
-import { Helpers } from "@pimasi/utils";
+import { getenv } from "@pimasi/utils/lib/helpers";
 
 // With default value
-const apiKey = Helpers.getenv("API_KEY", "default-key");
+const apiKey = getenv("API_KEY", "default-key");
 
 // Without default (throws InternalError if not set)
-const dbUrl = Helpers.getenv("DATABASE_URL");
+const dbUrl = getenv("DATABASE_URL");
 ```
 
 ### `sleep`
@@ -210,9 +144,9 @@ const dbUrl = Helpers.getenv("DATABASE_URL");
 Pause execution for a specified duration.
 
 ```ts
-import { Helpers } from "@pimasi/utils";
+import { sleep } from "@pimasi/utils/lib/helpers";
 
-await Helpers.sleep(2000); // Sleep for 2 seconds
+await sleep(2000); // Sleep for 2 seconds
 ```
 
 ### `jsonStringify`
@@ -220,12 +154,12 @@ await Helpers.sleep(2000); // Sleep for 2 seconds
 Safe JSON stringification with circular reference handling using fast-safe-stringify.
 
 ```ts
-import { Helpers } from "@pimasi/utils";
+import { jsonStringify } from "@pimasi/utils/lib/helpers";
 
 const circularObj = { a: 1 };
 circularObj.self = circularObj;
 
-const json = Helpers.jsonStringify(circularObj);
+const json = jsonStringify(circularObj);
 // Returns safe JSON string instead of throwing
 ```
 
@@ -234,12 +168,12 @@ const json = Helpers.jsonStringify(circularObj);
 Safe JSON parsing that returns `undefined` instead of throwing errors.
 
 ```ts
-import { Helpers } from "@pimasi/utils";
+import { jsonParse } from "@pimasi/utils/lib/helpers";
 
-const obj = Helpers.jsonParse('{"valid": "json"}');
+const obj = jsonParse('{"valid": "json"}');
 // Returns: { valid: "json" }
 
-const invalid = Helpers.jsonParse("invalid json");
+const invalid = jsonParse("invalid json");
 // Returns: undefined (instead of throwing)
 ```
 
@@ -248,9 +182,9 @@ const invalid = Helpers.jsonParse("invalid json");
 Wrapper for command-line scripts with proper error handling and process exit codes.
 
 ```ts
-import { Helpers } from "@pimasi/utils";
+import { execute } from "@pimasi/utils/lib/helpers";
 
-Helpers.execute(async () => {
+execute(async () => {
     // Your script logic
     await doSomething();
     // Exits with code 0 on success, 1 on error
@@ -276,12 +210,11 @@ Type-safe JSON Schema builder with full TypeScript inference — no external sch
 ### Import
 
 ```ts
-import { JsonSchema } from "@pimasi/utils";
-const { Schema } = JsonSchema;
+import { Schema, type Static, type InferRawSchema } from "@pimasi/utils/lib/json-schema";
 
 // Type helpers
-type MyType = JsonSchema.Static<typeof MySchema>;
-type RawInferred = JsonSchema.InferRawSchema<typeof rawSchema>;
+type MyType = Static<typeof MySchema>;
+type RawInferred = InferRawSchema<typeof rawSchema>;
 ```
 
 ### Schema Builders
@@ -334,7 +267,7 @@ const UserSchema = Schema.Object({
     bio: Schema.Optional(Schema.Nullable(Schema.String())),
 });
 
-type User = JsonSchema.Static<typeof UserSchema>;
+type User = Static<typeof UserSchema>;
 // { id: number; name: string; role: "admin" | "user"; bio?: string | null }
 ```
 
@@ -450,7 +383,7 @@ const schema = Schema.From({
     },
     required: ["name", "age"],
 });
-type T = JsonSchema.Static<typeof schema>; // { name: string; age: number }
+type T = Static<typeof schema>; // { name: string; age: number }
 ```
 
 ### Raw Schema Inference
@@ -469,7 +402,7 @@ const schema = {
     required: ["id", "name", "role", "active"],
 } as const;
 
-type MyType = JsonSchema.InferRawSchema<typeof schema>;
+type MyType = InferRawSchema<typeof schema>;
 // { id: number; name: string; role: "admin" | "user"; active: true }
 ```
 
@@ -546,7 +479,7 @@ Runtime-agnostic, type-safe implementation of event emitter pattern.
 ### Usage
 
 ```ts
-import { Observable } from "@pimasi/utils";
+import { Observable } from "@pimasi/utils/lib/observable";
 
 // Define events with types
 type Events = "userCreated" | "userDeleted" | "userUpdated";
@@ -602,42 +535,48 @@ All exceptions include:
 - `context` - Additional error context
 
 ```ts
-import { Error } from "@pimasi/utils";
+import {
+    BadRequest, ValidationFailed, Unauthorized, PaymentRequired,
+    Forbidden, NotFound, NotAcceptable, TimeOut, Conflict, Gone,
+    PreconditionFailed, PayloadTooLarge, URITooLong, UnsupportedMediaType,
+    ExpectationFailed, UnprocessableEntity, TooManyRequests,
+    InternalError, NotImplemented,
+} from "@pimasi/utils/lib/error";
 
 // 4xx Client Errors
-throw Error.BadRequest({ field: "email" }, "Invalid email format");
-throw Error.ValidationFailed({ errors: [...] });
-throw Error.Unauthorized();
-throw Error.PaymentRequired();
-throw Error.Forbidden();
-throw Error.NotFound({ resource: "user", id: 123 });
-throw Error.NotAcceptable();
-throw Error.TimeOut();
-throw Error.Conflict({ reason: "duplicate email" });
-throw Error.Gone();
-throw Error.PreconditionFailed();
-throw Error.PayloadTooLarge();
-throw Error.URITooLong();
-throw Error.UnsupportedMediaType();
-throw Error.ExpectationFailed();
-throw Error.UnprocessableEntity();
-throw Error.TooManyRequests();
+throw BadRequest({ field: "email" }, "Invalid email format");
+throw ValidationFailed({ errors: [...] });
+throw Unauthorized();
+throw PaymentRequired();
+throw Forbidden();
+throw NotFound({ resource: "user", id: 123 });
+throw NotAcceptable();
+throw TimeOut();
+throw Conflict({ reason: "duplicate email" });
+throw Gone();
+throw PreconditionFailed();
+throw PayloadTooLarge();
+throw URITooLong();
+throw UnsupportedMediaType();
+throw ExpectationFailed();
+throw UnprocessableEntity();
+throw TooManyRequests();
 
 // 5xx Server Errors
-throw Error.InternalError(err, "Database connection failed");
-throw Error.NotImplemented();
+throw InternalError(err, "Database connection failed");
+throw NotImplemented();
 ```
 
 ### Usage Example
 
 ```ts
-import { Error } from "@pimasi/utils";
+import { NotFound } from "@pimasi/utils/lib/error";
 
 function getUser(id: number) {
     const user = db.users.find(id);
 
     if (!user) {
-        throw Error.NotFound({ userId: id }, "User not found");
+        throw NotFound({ userId: id }, "User not found");
     }
 
     return user;
@@ -673,10 +612,10 @@ Axios-compatible HTTP client built on native `fetch`. Drop-in replacement with t
 ### Usage
 
 ```ts
-import { Http } from "@pimasi/utils";
+import { http } from "@pimasi/utils/lib/http";
 
 // Use the default instance directly
-const response = await Http.http({
+const response = await http({
     url: "https://api.example.com/users",
     method: "get",
 });
@@ -684,7 +623,7 @@ response.data; // parsed JSON
 response.status; // 200
 
 // Create a custom instance with defaults
-const client = Http.http.create({
+const client = http.create({
     baseURL: "https://api.example.com",
     headers: { Authorization: "Bearer token" },
     timeout: 5000,
@@ -707,9 +646,9 @@ const created = await client({
 ### Interceptors
 
 ```ts
-import { Http } from "@pimasi/utils";
+import { http } from "@pimasi/utils/lib/http";
 
-const client = Http.create({ baseURL: "https://api.example.com" });
+const client = http.create({ baseURL: "https://api.example.com" });
 
 // Request interceptor — modify config before sending
 const id = client.interceptors.request.use(
@@ -744,14 +683,14 @@ client.interceptors.request.clear();
 ### Error Handling
 
 ```ts
-import { Http } from "@pimasi/utils";
+import { http, HttpError } from "@pimasi/utils/lib/http";
 
-const client = Http.create({ baseURL: "https://api.example.com" });
+const client = http.create({ baseURL: "https://api.example.com" });
 
 try {
     await client({ url: "/not-found" });
 } catch (err) {
-    if (err instanceof Http.HttpError) {
+    if (err instanceof HttpError) {
         err.status; // 404
         err.message; // "Request failed with status code 404"
         err.response; // { data, status, statusText, headers, config }
@@ -797,9 +736,8 @@ interface HttpResponse<T = any, D = any> {
 
 ### API
 
-- `Http.http(config)` — make a request using the default instance
-- `Http.http.create(defaults?)` — create a new instance with defaults
-- `Http.create(defaults?)` — same as above (standalone export)
+- `http(config)` — make a request using the default instance
+- `http.create(defaults?)` — create a new instance with defaults
 - `instance(config)` — make a request
 - `instance.defaults` — instance default config
 - `instance.interceptors.request.use(onFulfilled?, onRejected?)` — add request interceptor, returns ID

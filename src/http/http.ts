@@ -8,7 +8,7 @@ import type {
 } from "./types";
 import { HttpError } from "./types";
 
-export function toFormData(obj: Record<string, any>): FormData {
+function toFormData(obj: Record<string, any>): FormData {
     const fd = new FormData();
     for (const [key, value] of Object.entries(obj)) {
         if (value != null) {
@@ -29,9 +29,7 @@ function buildURL(config: HttpRequestConfig): string {
     if (config.params) {
         let qs: string;
         if (config.paramsSerializer) {
-            qs = config.paramsSerializer(
-                config.params as Record<string, any>,
-            );
+            qs = config.paramsSerializer(config.params as Record<string, any>);
         } else {
             const parts: string[] = [];
             for (const [key, value] of Object.entries(config.params)) {
@@ -240,8 +238,7 @@ async function dispatchRequest<T = any, D = any>(
         const validateStatus =
             config.validateStatus === null
                 ? null
-                : config.validateStatus ||
-                  ((s: number) => s >= 200 && s < 300);
+                : config.validateStatus || ((s: number) => s >= 200 && s < 300);
 
         if (validateStatus && !validateStatus(res.status)) {
             throw new HttpError(
@@ -275,9 +272,8 @@ async function dispatchRequest<T = any, D = any>(
     }
 }
 
-export function create(defaults: HttpRequestConfig = {}): HttpInstance {
-    const requestInterceptors =
-        createInterceptorManager<HttpRequestConfig>();
+function create(defaults: HttpRequestConfig = {}): HttpInstance {
+    const requestInterceptors = createInterceptorManager<HttpRequestConfig>();
     const responseInterceptors = createInterceptorManager<HttpResponse>();
 
     const instance = function <T = any, D = any>(
@@ -321,8 +317,7 @@ export function create(defaults: HttpRequestConfig = {}): HttpInstance {
     } as HttpInstance;
 
     // Convenience methods — no body
-    instance.get = (url, config) =>
-        instance({ ...config, url, method: "get" });
+    instance.get = (url, config) => instance({ ...config, url, method: "get" });
     instance.delete = (url, config) =>
         instance({ ...config, url, method: "delete" });
     instance.head = (url, config) =>

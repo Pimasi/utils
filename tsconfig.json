@@ -3,17 +3,14 @@
         "target": "esnext",
         "module": "nodenext",
         "moduleResolution": "nodenext",
-        "esModuleInterop": true,
         "skipLibCheck": true,
+        "types": ["node"],
         "declaration": true,
         "diagnostics": true,
         "incremental": true,
         "sourceMap": true,
         "outDir": "lib",
-        "strict": true,
+        "strict": true
     },
-    "exclude": [
-        "node_modules",
-        "lib"
-    ]
+    "exclude": ["node_modules", "lib"]
 }
