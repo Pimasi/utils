@@ -8,16 +8,6 @@ import type {
 } from "./types";
 import { HttpError } from "./types";
 
-function toFormData(obj: Record<string, any>): FormData {
-    const fd = new FormData();
-    for (const [key, value] of Object.entries(obj)) {
-        if (value != null) {
-            fd.append(key, value instanceof Blob ? value : String(value));
-        }
-    }
-    return fd;
-}
-
 function buildURL(config: HttpRequestConfig): string {
     let url = config.url || "";
 
@@ -277,14 +267,8 @@ function create(defaults: HttpRequestConfig = {}): HttpInstance {
     const responseInterceptors = createInterceptorManager<HttpResponse>();
 
     const instance = function <T = any, D = any>(
-        configOrUrl: HttpRequestConfig<D> | string,
-        maybeConfig?: HttpRequestConfig<D>,
+        config: HttpRequestConfig<D>,
     ): Promise<HttpResponse<T, D>> {
-        const config: HttpRequestConfig<D> =
-            typeof configOrUrl === "string"
-                ? { ...(maybeConfig || {}), url: configOrUrl }
-                : configOrUrl;
-
         type ChainLink = {
             fulfilled?: ((value: any) => any) | null;
             rejected?: ((error: any) => any) | null;
@@ -315,43 +299,6 @@ function create(defaults: HttpRequestConfig = {}): HttpInstance {
 
         return promise;
     } as HttpInstance;
-
-    // Convenience methods — no body
-    instance.get = (url, config) => instance({ ...config, url, method: "get" });
-    instance.delete = (url, config) =>
-        instance({ ...config, url, method: "delete" });
-    instance.head = (url, config) =>
-        instance({ ...config, url, method: "head" });
-    instance.options = (url, config) =>
-        instance({ ...config, url, method: "options" });
-
-    // Convenience methods — with body
-    instance.post = (url, data, config) =>
-        instance({ ...config, url, method: "post", data });
-    instance.put = (url, data, config) =>
-        instance({ ...config, url, method: "put", data });
-    instance.patch = (url, data, config) =>
-        instance({ ...config, url, method: "patch", data });
-
-    // Form convenience methods
-    instance.postForm = (url, data, config) => {
-        const fd = data instanceof FormData ? data : toFormData(data as any);
-        return instance({ ...config, url, method: "post", data: fd as any });
-    };
-    instance.putForm = (url, data, config) => {
-        const fd = data instanceof FormData ? data : toFormData(data as any);
-        return instance({ ...config, url, method: "put", data: fd as any });
-    };
-    instance.patchForm = (url, data, config) => {
-        const fd = data instanceof FormData ? data : toFormData(data as any);
-        return instance({ ...config, url, method: "patch", data: fd as any });
-    };
-
-    // URI builder
-    instance.getUri = (config) => {
-        const merged = config ? mergeConfig(defaults, config) : defaults;
-        return buildURL(merged);
-    };
 
     instance.defaults = defaults;
     instance.interceptors = {

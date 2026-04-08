@@ -98,78 +98,12 @@ describe("Http", () => {
     });
 
     describe("string URL call signature", () => {
-        it("accepts url as first argument", async () => {
+        it("accepts url in config", async () => {
             const client = httpClient.create({ baseURL });
-            const response = await client("/echo");
+            const response = await client({ url: "/echo" });
 
             expect(response.status).toBe(200);
             expect(response.data.method).toBe("GET");
-        });
-
-        it("accepts url and config", async () => {
-            const client = httpClient.create({ baseURL });
-            const response = await client("/echo", {
-                method: "post",
-                data: { x: 1 },
-            });
-
-            expect(response.data.method).toBe("POST");
-            expect(response.data.body).toEqual({ x: 1 });
-        });
-    });
-
-    describe("convenience methods", () => {
-        it("get", async () => {
-            const client = httpClient.create({ baseURL });
-            const response = await client.get("/echo");
-
-            expect(response.data.method).toBe("GET");
-        });
-
-        it("post", async () => {
-            const client = httpClient.create({ baseURL });
-            const data = { name: "Rick" };
-            const response = await client.post("/echo", data);
-
-            expect(response.data.method).toBe("POST");
-            expect(response.data.body).toEqual(data);
-        });
-
-        it("put", async () => {
-            const client = httpClient.create({ baseURL });
-            const response = await client.put("/echo", { updated: true });
-
-            expect(response.data.method).toBe("PUT");
-            expect(response.data.body).toEqual({ updated: true });
-        });
-
-        it("patch", async () => {
-            const client = httpClient.create({ baseURL });
-            const response = await client.patch("/echo", { patched: true });
-
-            expect(response.data.method).toBe("PATCH");
-            expect(response.data.body).toEqual({ patched: true });
-        });
-
-        it("delete", async () => {
-            const client = httpClient.create({ baseURL });
-            const response = await client.delete("/echo");
-
-            expect(response.data.method).toBe("DELETE");
-        });
-
-        it("head", async () => {
-            const client = httpClient.create({ baseURL });
-            const response = await client.head("/echo");
-
-            expect(response.status).toBe(200);
-        });
-
-        it("options", async () => {
-            const client = httpClient.create({ baseURL });
-            const response = await client.options("/echo");
-
-            expect(response.status).toBe(200);
         });
     });
 
@@ -571,29 +505,6 @@ describe("Http", () => {
         });
     });
 
-    describe("getUri", () => {
-        it("builds URI from config", () => {
-            const client = httpClient.create({
-                baseURL: "https://api.example.com",
-            });
-            const uri = client.getUri({
-                url: "/users",
-                params: { page: 1, limit: 10 },
-            });
-
-            expect(uri).toBe("https://api.example.com/users?page=1&limit=10");
-        });
-
-        it("uses defaults", () => {
-            const client = httpClient.create({
-                baseURL: "https://api.example.com",
-            });
-            const uri = client.getUri({ url: "/health" });
-
-            expect(uri).toBe("https://api.example.com/health");
-        });
-    });
-
     describe("isHttpError", () => {
         it("returns true for HttpError instances", async () => {
             const client = httpClient.create({ baseURL });
@@ -627,41 +538,6 @@ describe("Http", () => {
                 code: undefined,
                 status: 500,
             });
-        });
-    });
-
-    describe("form helpers", () => {
-        it("postForm sends FormData", async () => {
-            const client = httpClient.create({ baseURL });
-            const response = await client.postForm("/echo", {
-                name: "Rick",
-                dimension: "C-137",
-            });
-
-            expect(response.data.method).toBe("POST");
-            expect(response.data.headers["content-type"]).toContain(
-                "multipart/form-data",
-            );
-        });
-
-        it("putForm sends FormData", async () => {
-            const client = httpClient.create({ baseURL });
-            const response = await client.putForm("/echo", { key: "value" });
-
-            expect(response.data.method).toBe("PUT");
-            expect(response.data.headers["content-type"]).toContain(
-                "multipart/form-data",
-            );
-        });
-
-        it("patchForm sends FormData", async () => {
-            const client = httpClient.create({ baseURL });
-            const response = await client.patchForm("/echo", { key: "value" });
-
-            expect(response.data.method).toBe("PATCH");
-            expect(response.data.headers["content-type"]).toContain(
-                "multipart/form-data",
-            );
         });
     });
 
@@ -743,12 +619,19 @@ describe("Http", () => {
                     { runWhen: (config) => config.method === "post" },
                 );
 
-                const getResponse = await client.get("/echo");
+                const getResponse = await client({
+                    url: "/echo",
+                    method: "get",
+                });
                 expect(
                     getResponse.data.headers["x-conditional"],
                 ).toBeUndefined();
 
-                const postResponse = await client.post("/echo", {});
+                const postResponse = await client({
+                    url: "/echo",
+                    method: "post",
+                    data: {},
+                });
                 expect(postResponse.data.headers["x-conditional"]).toBe("true");
             });
         });

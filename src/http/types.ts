@@ -80,61 +80,6 @@ export interface HttpInstance {
     <T = any, D = any>(
         config: HttpRequestConfig<D>,
     ): Promise<HttpResponse<T, D>>;
-    <T = any, D = any>(
-        url: string,
-        config?: HttpRequestConfig<D>,
-    ): Promise<HttpResponse<T, D>>;
-
-    get<T = any>(
-        url: string,
-        config?: HttpRequestConfig,
-    ): Promise<HttpResponse<T>>;
-    delete<T = any>(
-        url: string,
-        config?: HttpRequestConfig,
-    ): Promise<HttpResponse<T>>;
-    head<T = any>(
-        url: string,
-        config?: HttpRequestConfig,
-    ): Promise<HttpResponse<T>>;
-    options<T = any>(
-        url: string,
-        config?: HttpRequestConfig,
-    ): Promise<HttpResponse<T>>;
-
-    post<T = any, D = any>(
-        url: string,
-        data?: D,
-        config?: HttpRequestConfig<D>,
-    ): Promise<HttpResponse<T, D>>;
-    put<T = any, D = any>(
-        url: string,
-        data?: D,
-        config?: HttpRequestConfig<D>,
-    ): Promise<HttpResponse<T, D>>;
-    patch<T = any, D = any>(
-        url: string,
-        data?: D,
-        config?: HttpRequestConfig<D>,
-    ): Promise<HttpResponse<T, D>>;
-
-    postForm<T = any, D = any>(
-        url: string,
-        data?: D,
-        config?: HttpRequestConfig<D>,
-    ): Promise<HttpResponse<T, D>>;
-    putForm<T = any, D = any>(
-        url: string,
-        data?: D,
-        config?: HttpRequestConfig<D>,
-    ): Promise<HttpResponse<T, D>>;
-    patchForm<T = any, D = any>(
-        url: string,
-        data?: D,
-        config?: HttpRequestConfig<D>,
-    ): Promise<HttpResponse<T, D>>;
-
-    getUri(config?: HttpRequestConfig): string;
 
     defaults: HttpRequestConfig;
     interceptors: {

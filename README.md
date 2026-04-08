@@ -210,7 +210,11 @@ Type-safe JSON Schema builder with full TypeScript inference — no external sch
 ### Import
 
 ```ts
-import { Schema, type Static, type InferRawSchema } from "@pimasi/utils/lib/json-schema";
+import {
+    Schema,
+    type Static,
+    type InferRawSchema,
+} from "@pimasi/utils/lib/json-schema";
 
 // Type helpers
 type MyType = Static<typeof MySchema>;
@@ -595,12 +599,13 @@ try {
 
 ## Http
 
-Axios-compatible HTTP client built on native `fetch`. Drop-in replacement with the same API — `create`, interceptors, config merging, and error handling all work like axios.
+Axios-compatible HTTP client built on native `fetch`. Drop-in replacement with interceptors, config merging, and error handling.
 
 ### Features
 
 - Built on native `fetch` — zero HTTP dependencies
-- Axios-compatible API (`create`, callable instances, interceptors)
+- Single callable interface: `http(config)` / `instance(config)`
+- `create` factory for instances with shared defaults
 - Automatic JSON serialization/parsing
 - `baseURL` + relative URL resolution
 - Query parameter serialization
