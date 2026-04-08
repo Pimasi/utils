@@ -1,6 +1,6 @@
 {
     "name": "@pimasi/utils",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "private": false,
     "description": "The only utility library you'll ever need",
     "exports": {
