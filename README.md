@@ -751,10 +751,14 @@ const client = http.create({
 });
 ```
 
-This requires `undici` to be resolvable in your app (it ships with Node but is
-not importable by default). The library itself takes no dependency on undici —
-`dispatcher` is typed loosely as `unknown`. If you don't need per-request
-control, you can instead raise the limit process-wide at startup with undici's
+This is a **Node-only** option — browser `fetch` has no dispatcher concept and
+ignores the field, so it's always safe to leave unset in browser builds. It
+requires the `undici` package to be resolvable in your app for constructing the
+`Agent` (undici ships with Node but isn't importable by default). The library
+itself stays dependency-free: `dispatcher` is typed with the library's own
+minimal `HttpDispatcher` interface, which a real undici `Agent`/`Pool` satisfies
+structurally (no cast needed). If you don't need per-request control, you can
+instead raise the limit process-wide at startup with undici's
 `setGlobalDispatcher` — but that changes timeouts for every request in the
 process.
 
@@ -771,7 +775,7 @@ interface HttpRequestConfig<D = any> {
     timeout?: number; // Timeout in ms
     validateStatus?: ((status: number) => boolean) | null; // Custom status validation
     signal?: AbortSignal; // Abort signal
-    dispatcher?: unknown; // Custom undici Dispatcher forwarded to fetch
+    dispatcher?: HttpDispatcher; // Custom undici Dispatcher (Node-only) forwarded to fetch
 }
 ```
 

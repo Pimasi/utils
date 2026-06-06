@@ -1,3 +1,18 @@
+# Never Bump the Version Yourself
+
+**Do not edit the `version` field in `package.json`, ever** — not even when a task explicitly asks for a "minor/patch/major bump". Releases are owned by the maintainer and cut with `npm version` (which runs the `preversion` build and creates the version commit + tag). A manual edit desyncs that workflow.
+
+If a task seems to require a version change, **stop and flag it** in your summary instead of changing it, and let the maintainer run the release.
+
+# This Library Must Work in Node **and** the Browser
+
+`@pimasi/utils` is dual-target: every published module must run unchanged in both Node.js and the browser. Treat this as a hard constraint when writing or reviewing `src/**`:
+
+- **No Node-only runtime imports or globals** in shared code: no `require()`, no `node:*`/`fs`/`path`/`crypto` imports, no `Buffer`/`process`/`__dirname` on the default path. Use web-standard, cross-runtime APIs only (`fetch`, `Headers`, `Response`, `URL`, `TextDecoder`, `AbortController`, etc.).
+- **Node-only capabilities must be optional and inert in the browser.** Example: the HTTP client's `dispatcher` (an undici option) is an optional config field that is simply ignored by browser `fetch` — it is never required and never on the default code path. Follow this pattern for any future Node-specific feature.
+- **Keep the dependency tree empty — including types-only packages.** Prefer declaring a minimal structural type locally over adding a dependency such as `undici-types`. For example, the HTTP client's `dispatcher` is typed with a hand-written `HttpDispatcher` interface that a real undici `Agent` satisfies structurally, rather than importing undici's `Dispatcher`. Never add a Node-only package as a _runtime_ import.
+- When adding a feature, confirm it doesn't assume a single runtime before shipping.
+
 # Keep README Updated
 
 Whenever features are added, behavior is changed, APIs are updated, dependencies are changed, or release/version bumps happen, review changes and ensure `README.md` is up to date.

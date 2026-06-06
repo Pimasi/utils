@@ -348,7 +348,8 @@ describe("Http", () => {
 
         it("forwards a custom dispatcher to fetch init", async () => {
             const { getInit, restore } = captureInit();
-            const dispatcher = { marker: "custom-agent" };
+            // Minimal object satisfying HttpDispatcher (just needs `dispatch`)
+            const dispatcher = { marker: "custom-agent", dispatch: () => true };
             try {
                 const client = httpClient.create({ baseURL });
                 await client({ url: "/echo", dispatcher });
@@ -373,7 +374,8 @@ describe("Http", () => {
 
         it("composes dispatcher with signal/timeout on the same request", async () => {
             const { getInit, restore } = captureInit();
-            const dispatcher = { marker: "custom-agent" };
+            // Minimal object satisfying HttpDispatcher (just needs `dispatch`)
+            const dispatcher = { marker: "custom-agent", dispatch: () => true };
             try {
                 const client = httpClient.create({ baseURL });
                 await client({ url: "/echo", dispatcher, timeout: 5000 });
