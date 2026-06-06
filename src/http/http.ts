@@ -134,6 +134,13 @@ async function dispatchRequest<T = any, D = any>(
     const headers = new Headers(headerRecord);
     const init: RequestInit = { method, headers, body };
 
+    // Custom undici dispatcher (e.g. an Agent with a raised headersTimeout).
+    // Not part of the standard RequestInit type, but honored by undici's fetch.
+    if (config.dispatcher != null) {
+        (init as RequestInit & { dispatcher?: unknown }).dispatcher =
+            config.dispatcher;
+    }
+
     // withCredentials
     if (config.withCredentials) {
         init.credentials = "include";

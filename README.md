@@ -612,6 +612,7 @@ Axios-compatible HTTP client built on native `fetch`. Drop-in replacement with i
 - Request/response interceptors with `use`/`eject`/`clear`
 - Configurable status validation
 - Timeout support via `AbortController`
+- Custom undici `Dispatcher` passthrough (e.g. to raise the hidden `headersTimeout`)
 - `HttpError` with `isAxiosError: true` for compatibility
 
 ### Usage
@@ -711,6 +712,52 @@ const response = await client({
 response.status; // 404
 ```
 
+### Custom Dispatcher (raising `headersTimeout` / `bodyTimeout`)
+
+Node's `fetch` (powered by undici) aborts a request after a default
+`headersTimeout` of ~5 minutes while waiting for the response headers (and has a
+matching `bodyTimeout`). Neither is exposed on `fetch` directly, and the
+client's `timeout` option only adds an `AbortController` ceiling — it can
+shorten the wait, never extend it.
+
+For legitimately long synchronous requests (e.g. a server-to-server OCR call
+that takes many minutes to return its first byte), pass a custom undici
+`Dispatcher` via the `dispatcher` config option. It is forwarded onto the
+`fetch` init per request, so it raises the transport timeouts for that one call
+without mutating the global dispatcher (which would affect every consumer in the
+process):
+
+```ts
+import { http } from "@pimasi/utils/lib/http";
+import { Agent } from "undici";
+
+// Wait up to 10 minutes for the response headers/body
+await http({
+    url: "https://ocr.example.com/extract",
+    method: "POST",
+    data,
+    dispatcher: new Agent({ headersTimeout: 600_000, bodyTimeout: 600_000 }),
+});
+```
+
+`dispatcher` composes with `timeout` and `signal` — you can still set an
+`AbortController` ceiling on the same request. Set it as an instance default to
+apply to every request:
+
+```ts
+const client = http.create({
+    baseURL: "https://ocr.example.com",
+    dispatcher: new Agent({ headersTimeout: 600_000, bodyTimeout: 600_000 }),
+});
+```
+
+This requires `undici` to be resolvable in your app (it ships with Node but is
+not importable by default). The library itself takes no dependency on undici —
+`dispatcher` is typed loosely as `unknown`. If you don't need per-request
+control, you can instead raise the limit process-wide at startup with undici's
+`setGlobalDispatcher` — but that changes timeouts for every request in the
+process.
+
 ### Request Config
 
 ```ts
@@ -724,6 +771,7 @@ interface HttpRequestConfig<D = any> {
     timeout?: number; // Timeout in ms
     validateStatus?: ((status: number) => boolean) | null; // Custom status validation
     signal?: AbortSignal; // Abort signal
+    dispatcher?: unknown; // Custom undici Dispatcher forwarded to fetch
 }
 ```
 

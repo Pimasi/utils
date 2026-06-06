@@ -17,6 +17,24 @@ export interface HttpRequestConfig<D = any> {
     timeout?: number;
     validateStatus?: ((status: number) => boolean) | null;
     signal?: AbortSignal;
+    /**
+     * Custom undici `Dispatcher` (e.g. an `Agent`) forwarded onto the
+     * underlying `fetch` call. Use this to override undici transport limits
+     * that aren't exposed on `fetch` directly — most notably the hidden ~5 min
+     * `headersTimeout` (and `bodyTimeout`) — on a per-request basis, without
+     * mutating the global dispatcher:
+     *
+     * ```ts
+     * import { Agent } from "undici";
+     * const dispatcher = new Agent({ headersTimeout: 600_000, bodyTimeout: 600_000 });
+     * await http({ url, method: "POST", data, dispatcher });
+     * ```
+     *
+     * Composes with `timeout` and `signal` (an AbortController ceiling can still
+     * apply). Requires `undici` to be resolvable in the consuming app. Typed as
+     * `unknown` to avoid taking on a dependency on undici's types.
+     */
+    dispatcher?: unknown;
     withCredentials?: boolean;
     responseType?: "json" | "text" | "arraybuffer" | "blob";
     auth?: { username: string; password: string };

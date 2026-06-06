@@ -320,6 +320,74 @@ describe("Http", () => {
         });
     });
 
+    describe("dispatcher", () => {
+        // Stub fetch with a synthetic Response so the captured init isn't
+        // validated by undici (which rejects a non-Dispatcher object).
+        function captureInit(): {
+            getInit: () => any;
+            restore: () => void;
+        } {
+            const originalFetch = globalThis.fetch;
+            let capturedInit: any;
+            globalThis.fetch = ((_input: any, init: any) => {
+                capturedInit = init;
+                return Promise.resolve(
+                    new Response("{}", {
+                        status: 200,
+                        headers: { "content-type": "application/json" },
+                    }),
+                );
+            }) as typeof fetch;
+            return {
+                getInit: () => capturedInit,
+                restore: () => {
+                    globalThis.fetch = originalFetch;
+                },
+            };
+        }
+
+        it("forwards a custom dispatcher to fetch init", async () => {
+            const { getInit, restore } = captureInit();
+            const dispatcher = { marker: "custom-agent" };
+            try {
+                const client = httpClient.create({ baseURL });
+                await client({ url: "/echo", dispatcher });
+            } finally {
+                restore();
+            }
+
+            expect(getInit().dispatcher).toBe(dispatcher);
+        });
+
+        it("omits dispatcher from init when not provided", async () => {
+            const { getInit, restore } = captureInit();
+            try {
+                const client = httpClient.create({ baseURL });
+                await client({ url: "/echo" });
+            } finally {
+                restore();
+            }
+
+            expect("dispatcher" in getInit()).toBe(false);
+        });
+
+        it("composes dispatcher with signal/timeout on the same request", async () => {
+            const { getInit, restore } = captureInit();
+            const dispatcher = { marker: "custom-agent" };
+            try {
+                const client = httpClient.create({ baseURL });
+                await client({ url: "/echo", dispatcher, timeout: 5000 });
+            } finally {
+                restore();
+            }
+
+            const init = getInit();
+            expect(init.dispatcher).toBe(dispatcher);
+            // timeout still installs an AbortController signal alongside it
+            expect(init.signal).toBeDefined();
+        });
+    });
+
     describe("auth", () => {
         it("sends basic auth header", async () => {
             const client = httpClient.create({ baseURL });
